@@ -1,0 +1,47 @@
+@startuml
+' 父类 <|-- 子类
+' 接口 <|.. 实现
+interface Protocol{
+    ListenerAndServer(address string) error
+    Client() *sync.Map
+}
+
+interface Handler {
+    Handler()
+    OnOpen()
+    OnClose()
+}
+
+class TCPHandler {
+    tcp *TCPProtocol
+    client *client.TigerClient
+    streamBuffer chan *Payload
+    streamParsePool *sync.Pool
+}
+
+class TCPProtocol{
+    status uint32
+    close chan struct{}
+    delay time.Duration
+    maxDelay time.Duration
+    keepAlive bool
+    keepAlivePeriod time.Duration
+    allClients *sync.Map
+}
+
+class Client {
+    ID int
+    Context *tcontext.Context
+}
+
+class Context{
+    ctx context.Context
+    conn net.Conn
+}
+
+Handler <|.. TCPHandler
+Protocol <|.. TCPProtocol
+TCPHandler o-- TCPProtocol
+TCPHandler o-- Client
+Client o-- Context
+@enduml
